@@ -7,7 +7,7 @@ import sys
 ROW_COUNT = 6
 COL_COUNT = 7
 
-BLUE = (0, 0, 200)
+BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
 YELLOW = (255, 255, 0)
 RED = (200, 0, 0)
