@@ -1,56 +1,89 @@
 import numpy as np
 import pygame
-from functions import create_board, is_valid_column, update_board, check_for_win
+from functions import create_board, is_valid_column, update_board, check_for_win, draw_board
+import sys
 
 # Board Size
 ROW_COUNT = 6
 COL_COUNT = 7
 
+BLUE = (0, 0, 200)
+BLACK = (0, 0, 0)
+YELLOW = (255, 255, 0)
+RED = (200, 0 , 0)
+
 board = create_board()
 turn = 0
 
-# SQUARESIZE = 100
-# width = COL_COUNT*SQUARESIZE
-# height = (ROW_COUNT+1)*SQUARESIZE
-# size = (width, height)
-#
-# pygame.init()
-# pygame.display.set_mode(size)
+game_over = False
 
-# screen = pygame.display.set_mode(size)
+SQUARESIZE = 100
+width = COL_COUNT*SQUARESIZE
+height = (ROW_COUNT+1)*SQUARESIZE
+size = (width, height)
 
-while 1:
+pygame.init()  # Init pygame
+pygame.display.set_mode(size)  # Set window size
+
+screen = pygame.display.set_mode(size)  # Init screen (surface)
+draw_board(board, screen)  # Draw the board with recs and black circles
+pygame.display.update()  # Update the graphics
+
+myfont = pygame.font.SysFont('monospace', 75)
+
+while not game_over:
     if all(board[0, :] > 0):
-        print('No one won!, It is a TIE!')
-        break
-    if turn == 0:
-        # Player 1
-        col = int(input('Player 1: Enter a valid column number (1-7):'))
+        pygame.draw.rect(screen, BLACK, (0, 0, SQUARESIZE * COL_COUNT, SQUARESIZE))
+        label = myfont.render('It is a TIE', 1, BLUE)
+        screen.blit(label, (40, 10))
+        game_over = True
 
-        if is_valid_column(board, col-1):
-            board = update_board(board, col-1, turn+1)
-        else:
-            while not is_valid_column(board, col-1):
-                col = int(input('Player 1: Please pick a valid column:'))
-            board = update_board(board, col-1, turn+1)
+    for event in pygame.event.get():
 
-        print(board)
-        if check_for_win(board, turn+1):
-            print('Player 1 WON !')
-            break
-    else:
-        # Player 2
-        col = int(input('Player 2: Enter a valid column number (1-7):'))
+        if event.type == pygame.QUIT:
+            sys.exit()
 
-        if is_valid_column(board, col-1):
-            board = update_board(board, col-1, turn+1)
-        else:
-            while not is_valid_column(board, col-1):
-                col = int(input('Player 2: Please pick a valid column:'))
-            board = update_board(board, col-1, turn+1)
+        if event.type == pygame.MOUSEMOTION:
+            pygame.draw.rect(screen, BLACK, (0, 0, SQUARESIZE*COL_COUNT, SQUARESIZE))
+            if turn == 0:
+                pygame.draw.circle(screen, RED, (event.pos[0], SQUARESIZE/2), SQUARESIZE/2-3)
+            else:
+                pygame.draw.circle(screen, YELLOW, (event.pos[0], SQUARESIZE / 2), SQUARESIZE / 2 - 3)
+            pygame.display.update()
 
-        print(board)
-        if check_for_win(board, turn+1):
-            print('Player 2 WON !')
-            break
-    turn = 1 - turn  # Change turn
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if turn == 0:
+                # Player 1
+                col = int(event.pos[0]/SQUARESIZE)+1  # Between 1-7
+
+                if is_valid_column(board, col-1):
+                    board = update_board(board, col-1, turn+1)
+                else:
+                    turn = 1-turn  # don't change turns if invalid column
+
+                if check_for_win(board, turn+1):
+                    pygame.draw.rect(screen, BLACK, (0, 0, SQUARESIZE * COL_COUNT, SQUARESIZE))
+                    label = myfont.render('Player 1 WINS', 1, RED)
+                    screen.blit(label, (40, 10))
+                    game_over = True
+            else:
+                # Player 2
+                col = int(event.pos[0]/SQUARESIZE)+1  # Between 1-7
+
+                if is_valid_column(board, col-1):
+                    board = update_board(board, col-1, turn+1)
+                else:
+                    turn = 1 - turn  # don't change turns if invalid column
+
+                if check_for_win(board, turn+1):
+                    pygame.draw.rect(screen, BLACK, (0, 0, SQUARESIZE * COL_COUNT, SQUARESIZE))
+                    label = myfont.render('Player 2 WINS', 1, YELLOW)
+                    screen.blit(label, (40, 10))
+                    game_over = True
+
+            draw_board(board, screen)
+
+            if game_over:
+                pygame.time.delay(2500)
+
+            turn = 1 - turn  # Change turn
