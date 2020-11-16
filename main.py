@@ -10,7 +10,7 @@ COL_COUNT = 7
 BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
 YELLOW = (255, 255, 0)
-RED = (200, 0, 0)
+RED = (255, 0, 0)
 WHITE = (255, 255, 255)
 
 board = create_board()
@@ -95,8 +95,9 @@ while not game_over:
 
             turn = 1 - turn  # Change turn
             # Immediately change color of the piece. don't wait for motion of the mouse
-            if turn == 0:
-                pygame.draw.circle(screen, RED, (event.pos[0], SQUARESIZE/2), SQUARESIZE/2-3)
-            else:
-                pygame.draw.circle(screen, YELLOW, (event.pos[0], SQUARESIZE / 2), SQUARESIZE / 2 - 3)
-            pygame.display.update()
+            if not game_over:
+                if turn == 0:
+                    pygame.draw.circle(screen, RED, (event.pos[0], SQUARESIZE/2), SQUARESIZE/2-3)
+                else:
+                    pygame.draw.circle(screen, YELLOW, (event.pos[0], SQUARESIZE / 2), SQUARESIZE / 2 - 3)
+                pygame.display.update()
