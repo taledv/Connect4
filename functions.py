@@ -12,11 +12,13 @@ size = (width, height)
 BLUE = (0, 0, 200)
 BLACK = (0, 0, 0)
 YELLOW = (255, 255, 0)
-RED = (200, 0 , 0)
+RED = (200, 0, 0)
+RED_WIN = (139, 0, 0)
+YELLOW_WIN = (255, 127, 80)
 
 
 def create_board():
-    return np.zeros((ROW_COUNT,COL_COUNT), dtype=int)
+    return np.zeros((ROW_COUNT, COL_COUNT), dtype=int)
 
 
 def draw_board(board, screen):
@@ -59,6 +61,7 @@ def check_for_win(board, piece):
     for col in range(COL_COUNT):
         for row in range(ROW_COUNT-3):
             if all(board[row:row+4, col] == piece):
+                # print(row, col)
                 return True
     # negative diagonals
     for row in range(ROW_COUNT-3):
@@ -71,3 +74,41 @@ def check_for_win(board, piece):
             if (board[row, col] == piece) and (board[row+1, col-1] == piece) and (board[row+2, col-2] == piece) and (board[row+3, col-3] == piece):
                 return True
     return False
+
+
+def winning_indices(board, piece):
+    # Horizontal Check
+    for row in range(ROW_COUNT):
+        for col in range(COL_COUNT-3):
+            if all(board[row, col:col+4] == piece):
+                return np.array([[row, col], [row, col+1], [row, col+2], [row, col+3]])
+
+    # Vertical Check
+    for col in range(COL_COUNT):
+        for row in range(ROW_COUNT-3):
+            if all(board[row:row+4, col] == piece):
+                return np.array([[row, col], [row+1, col], [row+2, col], [row+3, col]])
+
+    # negative diagonals
+    for row in range(ROW_COUNT-3):
+        for col in range(COL_COUNT-3):
+            if (board[row, col] == piece) and (board[row+1, col+1] == piece) and (board[row+2, col+2] == piece) and (board[row+3, col+3] == piece):
+                return np.array([[row, col], [row+1, col+1], [row+2, col+2], [row+3, col+3]])
+
+    # positive diagonals
+    for row in range(ROW_COUNT-3):
+        for col in range(COL_COUNT-1, 2, -1):
+            if (board[row, col] == piece) and (board[row+1, col-1] == piece) and (board[row+2, col-2] == piece) and (board[row+3, col-3] == piece):
+                return np.array([[row, col], [row+1, col-1], [row+2, col-2], [row+3, col-3]])
+
+
+def draw_end_board(board, screen, winning_indices):
+
+    draw_board(board, screen)
+
+    for i in range(winning_indices.shape[0]):
+        if board[winning_indices[i, 0], winning_indices[i, 1]] == 1:
+            pygame.draw.circle(screen, RED_WIN, ((winning_indices[i, 1]+0.5)*SQUARESIZE, (winning_indices[i, 0]+1.5)*SQUARESIZE), SQUARESIZE/2-3)
+        else:
+            pygame.draw.circle(screen, YELLOW_WIN, ((winning_indices[i, 1]+0.5)*SQUARESIZE, (winning_indices[i, 0]+1.5)*SQUARESIZE), SQUARESIZE/2-3)
+    pygame.display.update()  # Update the graphics

@@ -1,6 +1,6 @@
 import numpy as np
 import pygame
-from functions import create_board, is_valid_column, update_board, check_for_win, draw_board
+from functions import create_board, is_valid_column, update_board, check_for_win, draw_board, winning_indices, draw_end_board
 import sys
 
 # Board Size
@@ -10,7 +10,8 @@ COL_COUNT = 7
 BLUE = (0, 0, 200)
 BLACK = (0, 0, 0)
 YELLOW = (255, 255, 0)
-RED = (200, 0 , 0)
+RED = (200, 0, 0)
+WHITE = (255, 255, 255)
 
 board = create_board()
 turn = 0
@@ -34,7 +35,7 @@ myfont = pygame.font.SysFont('monospace', 75)
 while not game_over:
     if all(board[0, :] > 0):
         pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
-        label = myfont.render('It is a TIE', 1, BLUE)
+        label = myfont.render('It is a TIE', 1, WHITE)
         screen.blit(label, (40, 10))
         game_over = True
 
@@ -62,6 +63,8 @@ while not game_over:
                     turn = 1-turn  # don't change turns if invalid column
 
                 if check_for_win(board, turn+1):
+                    win_indices = winning_indices(board, turn+1)
+
                     pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
                     label = myfont.render('Player 1 WINS', 1, RED)
                     screen.blit(label, (40, 10))
@@ -76,6 +79,8 @@ while not game_over:
                     turn = 1 - turn  # don't change turns if invalid column
 
                 if check_for_win(board, turn+1):
+                    win_indices = winning_indices(board, turn+1)
+
                     pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
                     label = myfont.render('Player 2 WINS', 1, YELLOW)
                     screen.blit(label, (40, 10))
@@ -84,6 +89,14 @@ while not game_over:
             draw_board(board, screen)
 
             if game_over:
+                draw_end_board(board, screen, win_indices)
+                pygame.display.update()
                 pygame.time.delay(2500)
 
             turn = 1 - turn  # Change turn
+            # Immediately change color of the piece. don't wait for motion of the mouse
+            if turn == 0:
+                pygame.draw.circle(screen, RED, (event.pos[0], SQUARESIZE/2), SQUARESIZE/2-3)
+            else:
+                pygame.draw.circle(screen, YELLOW, (event.pos[0], SQUARESIZE / 2), SQUARESIZE / 2 - 3)
+            pygame.display.update()
