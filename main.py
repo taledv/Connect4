@@ -1,8 +1,6 @@
 import numpy as np
 import pygame
-from functions import create_board, is_valid_column, update_board, check_for_win, draw_board, winning_indices, draw_end_board, draw_intro_screen
-from functions import intro_screen, p_vs_p, p_vs_ai
-import sys
+from functions import create_board, intro_screen, p_vs_p, p_vs_ai
 
 # Board Size
 ROW_COUNT = 6
