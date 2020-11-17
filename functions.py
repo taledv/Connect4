@@ -1,5 +1,7 @@
 import numpy as np
 import pygame
+import sys
+
 # Board Size
 ROW_COUNT = 6
 COL_COUNT = 7
@@ -14,33 +16,194 @@ BLACK = (0, 0, 0)
 YELLOW = (255, 255, 0)
 RED = (200, 0, 0)
 RED_WIN = (139, 0, 0)
-YELLOW_WIN = (255, 127, 80)
+YELLOW_WIN = (255, 243, 128)
 WHITE = (255, 255, 255)
-
-
-def create_board():
-    return np.zeros((ROW_COUNT, COL_COUNT), dtype=int)
+Player = 1
+AI = 2
 
 
 def draw_intro_screen(screen):
     for row in range(ROW_COUNT+1):
         for col in range(COL_COUNT):
-            pygame.draw.rect(screen, WHITE, (col*SQUARESIZE, row*SQUARESIZE, SQUARESIZE, SQUARESIZE))
-            if row == 3 and col == 2:
-                pygame.draw.rect(screen, RED, (col*SQUARESIZE, row*SQUARESIZE, SQUARESIZE, SQUARESIZE))
-            if row == 3 and col == 5:
-                pygame.draw.rect(screen, BLUE, (col*SQUARESIZE, row*SQUARESIZE, SQUARESIZE, SQUARESIZE))
+            pygame.draw.rect(screen, YELLOW_WIN, (col*SQUARESIZE, row*SQUARESIZE, SQUARESIZE, SQUARESIZE))
+
+    pygame.draw.rect(screen, RED, (150, 350, SQUARESIZE, SQUARESIZE))  # AI BUTTON
+    pygame.draw.rect(screen, BLUE, (450, 350, SQUARESIZE, SQUARESIZE))  # PVP BUTTON
 
     myfont = pygame.font.SysFont('monospace', 25)
     label = myfont.render('AI', 1, RED)
-    screen.blit(label, (240, 270))
+    screen.blit(label, (185, 320))
     label = myfont.render('PVsP', 1, BLUE)
-    screen.blit(label, (520, 270))
+    screen.blit(label, (475, 320))
 
-    myfont = pygame.font.SysFont('monospace', 60)
-    label = myfont.render('Welcome to Connect4 (:', 1, BLACK)
-    screen.blit(label, (10, 10))
+    myfont = pygame.font.SysFont('monospace', 50)
+    label = myfont.render('Welcome to Connect4 !', 1, BLACK)
+    screen.blit(label, (30, 30))
+
+    myfont = pygame.font.SysFont('monospace', 40)
+    label = myfont.render('Choose a game mode:', 1, BLACK)
+    screen.blit(label, (150, 200))
+
     pygame.display.update()  # Update the graphics
+
+
+def intro_screen(screen, board):
+
+    draw_intro_screen(screen)
+    pygame.display.update()  # Update the graphics
+
+    intro_screen = True
+    while intro_screen:
+        for event in pygame.event.get():
+
+            if event.type == pygame.QUIT:
+                sys.exit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                print(event.pos)
+                if event.pos[0] > 150 and event.pos[0] < 250 and event.pos[1] > 350 and event.pos[1] < 450:
+                    Choise = AI
+                elif event.pos[0] > 450 and event.pos[0] < 550 and event.pos[1] > 350 and event.pos[1] < 450:
+                    Choise = Player
+                else:
+                    continue
+                for col in range(COL_COUNT):
+                    pygame.draw.rect(screen, BLACK, (col * SQUARESIZE, 0, SQUARESIZE, SQUARESIZE))
+                intro_screen = False
+
+    draw_board(board, screen)  # Draw the board with recs and black circles
+    pygame.display.update()  # Update the graphics
+    return Choise
+
+
+def p_vs_p(screen, board, turn, game_over, myfont):
+    while not game_over:
+        if all(board[0, :] > 0):
+            pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
+            label = myfont.render('It is a TIE', 1, WHITE)
+            screen.blit(label, (40, 10))
+            game_over = True
+
+        for event in pygame.event.get():
+
+            if event.type == pygame.QUIT:
+                sys.exit()
+
+            if event.type == pygame.MOUSEMOTION:
+                pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
+                if turn == 0:
+                    pygame.draw.circle(screen, RED, (event.pos[0], SQUARESIZE / 2), SQUARESIZE / 2 - 3)
+                else:
+                    pygame.draw.circle(screen, YELLOW, (event.pos[0], SQUARESIZE / 2), SQUARESIZE / 2 - 3)
+                pygame.display.update()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if turn == 0:
+                    # Player 1
+                    col = int(event.pos[0] / SQUARESIZE) + 1  # Between 1-7
+
+                    if is_valid_column(board, col - 1):
+                        board = update_board(board, col - 1, turn + 1)
+                        if check_for_win(board, turn + 1):
+                            win_indices = winning_indices(board, turn + 1)
+
+                            pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
+                            label = myfont.render('Player 1 WINS', 1, RED)
+                            screen.blit(label, (40, 10))
+                            game_over = True
+                        turn = 1 - turn
+                else:
+                    # Player 2
+                    col = int(event.pos[0] / SQUARESIZE) + 1  # Between 1-7
+
+                    if is_valid_column(board, col - 1):
+                        board = update_board(board, col - 1, turn + 1)
+                        if check_for_win(board, turn + 1):
+                            win_indices = winning_indices(board, turn + 1)
+
+                            pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
+                            label = myfont.render('Player 2 WINS', 1, YELLOW)
+                            screen.blit(label, (40, 10))
+                            game_over = True
+                        turn = 1-turn
+
+                draw_board(board, screen)
+
+                if game_over:
+                    draw_end_board(board, screen, win_indices)
+                    pygame.display.update()
+                    pygame.time.delay(2500)
+
+                # Immediately change color of the piece. don't wait for motion of the mouse
+                if not game_over:
+                    if turn == 0:
+                        pygame.draw.circle(screen, RED, (event.pos[0], SQUARESIZE / 2), SQUARESIZE / 2 - 3)
+                    else:
+                        pygame.draw.circle(screen, YELLOW, (event.pos[0], SQUARESIZE / 2), SQUARESIZE / 2 - 3)
+                    pygame.display.update()
+
+
+def p_vs_ai(screen, board, turn, game_over, myfont):
+    while not game_over:
+        if all(board[0, :] > 0):
+            pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
+            label = myfont.render('It is a TIE', 1, WHITE)
+            screen.blit(label, (40, 10))
+            game_over = True
+
+        for event in pygame.event.get():
+
+            if event.type == pygame.QUIT:
+                sys.exit()
+
+            if event.type == pygame.MOUSEMOTION:
+                pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
+                if turn == 0:
+                    pygame.draw.circle(screen, RED, (event.pos[0], SQUARESIZE / 2), SQUARESIZE / 2 - 3)
+                else:
+                    pygame.draw.circle(screen, YELLOW, (event.pos[0], SQUARESIZE / 2), SQUARESIZE / 2 - 3)
+                pygame.display.update()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if turn == 0:
+                    # Human player
+                    col = int(event.pos[0] / SQUARESIZE) + 1  # Between 1-7
+
+                    if is_valid_column(board, col - 1):
+                        board = update_board(board, col - 1, turn + 1)
+                        if check_for_win(board, turn + 1):
+                            win_indices = winning_indices(board, turn + 1)
+
+                            pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
+                            label = myfont.render('You Won!', 1, RED)
+                            screen.blit(label, (180, 10))
+                            game_over = True
+                        turn = 1 - turn
+                        draw_board(board, screen)
+        # AI
+        if turn == 1 and not game_over:
+            col = np.random.randint(1, 8)  # Between 1-7
+            pygame.time.delay(400)
+            if is_valid_column(board, col - 1):
+                board = update_board(board, col - 1, turn + 1)
+                if check_for_win(board, turn + 1):
+                    win_indices = winning_indices(board, turn + 1)
+
+                    pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
+                    label = myfont.render('AI Won!', 1, YELLOW)
+                    screen.blit(label, (180, 10))
+                    game_over = True
+                turn = 1 - turn
+                draw_board(board, screen)
+
+        if game_over:
+            draw_end_board(board, screen, win_indices)
+            pygame.display.update()
+            pygame.time.delay(3000)
+
+
+def create_board():
+    return np.zeros((ROW_COUNT, COL_COUNT), dtype=int)
 
 
 def draw_board(board, screen):
