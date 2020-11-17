@@ -1,11 +1,16 @@
 import numpy as np
 import pygame
-from functions import create_board, is_valid_column, update_board, check_for_win, draw_board, winning_indices, draw_end_board
+from functions import create_board, is_valid_column, update_board, check_for_win, draw_board, winning_indices, draw_end_board, draw_intro_screen
 import sys
 
 # Board Size
 ROW_COUNT = 6
 COL_COUNT = 7
+SQUARESIZE = 100
+
+width = COL_COUNT*SQUARESIZE
+height = (ROW_COUNT+1)*SQUARESIZE
+size = (width, height)
 
 BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
@@ -16,17 +21,35 @@ WHITE = (255, 255, 255)
 board = create_board()
 turn = 0
 
-game_over = False
+Player = 1
+AI = 2
 
-SQUARESIZE = 100
-width = COL_COUNT*SQUARESIZE
-height = (ROW_COUNT+1)*SQUARESIZE
-size = (width, height)
+game_over = False
+intro_screen = True
 
 pygame.init()  # Init pygame
 pygame.display.set_mode(size)  # Set window size
 
 screen = pygame.display.set_mode(size)  # Init screen (surface)
+
+draw_intro_screen(screen)
+pygame.display.update()  # Update the graphics
+
+
+while intro_screen:
+    for event in pygame.event.get():
+
+        pygame.display.update()
+        if event.type == pygame.QUIT:
+            sys.exit()
+
+        # if event.type == pygame.MOUSEMOTION:
+        #     continue
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            print(event.pos)
+            if True:
+                intro_screen = False
+
 draw_board(board, screen)  # Draw the board with recs and black circles
 pygame.display.update()  # Update the graphics
 

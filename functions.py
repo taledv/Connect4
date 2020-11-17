@@ -15,10 +15,32 @@ YELLOW = (255, 255, 0)
 RED = (200, 0, 0)
 RED_WIN = (139, 0, 0)
 YELLOW_WIN = (255, 127, 80)
+WHITE = (255, 255, 255)
 
 
 def create_board():
     return np.zeros((ROW_COUNT, COL_COUNT), dtype=int)
+
+
+def draw_intro_screen(screen):
+    for row in range(ROW_COUNT+1):
+        for col in range(COL_COUNT):
+            pygame.draw.rect(screen, WHITE, (col*SQUARESIZE, row*SQUARESIZE, SQUARESIZE, SQUARESIZE))
+            if row == 3 and col == 2:
+                pygame.draw.rect(screen, RED, (col*SQUARESIZE, row*SQUARESIZE, SQUARESIZE, SQUARESIZE))
+            if row == 3 and col == 5:
+                pygame.draw.rect(screen, BLUE, (col*SQUARESIZE, row*SQUARESIZE, SQUARESIZE, SQUARESIZE))
+
+    myfont = pygame.font.SysFont('monospace', 25)
+    label = myfont.render('AI', 1, RED)
+    screen.blit(label, (240, 270))
+    label = myfont.render('PVsP', 1, BLUE)
+    screen.blit(label, (520, 270))
+
+    myfont = pygame.font.SysFont('monospace', 60)
+    label = myfont.render('Welcome to Connect4 (:', 1, BLACK)
+    screen.blit(label, (10, 10))
+    pygame.display.update()  # Update the graphics
 
 
 def draw_board(board, screen):
