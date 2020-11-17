@@ -60,7 +60,6 @@ def intro_screen(screen, board):
                 sys.exit()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                print(event.pos)
                 if event.pos[0] > 150 and event.pos[0] < 250 and event.pos[1] > 350 and event.pos[1] < 450:
                     Choise = AI
                 elif event.pos[0] > 450 and event.pos[0] < 550 and event.pos[1] > 350 and event.pos[1] < 450:
