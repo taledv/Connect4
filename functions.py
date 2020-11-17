@@ -58,7 +58,7 @@ def draw_board(board, screen):
 
 def update_board(board, col, piece):
     row_init = ROW_COUNT-1
-    while row_init>=0:
+    while row_init >= 0:
         if board[row_init, col] == 0:
             board[row_init, col] = piece
             return board

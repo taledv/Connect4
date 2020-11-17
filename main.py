@@ -39,16 +39,21 @@ pygame.display.update()  # Update the graphics
 while intro_screen:
     for event in pygame.event.get():
 
-        pygame.display.update()
         if event.type == pygame.QUIT:
             sys.exit()
 
-        # if event.type == pygame.MOUSEMOTION:
-        #     continue
         if event.type == pygame.MOUSEBUTTONDOWN:
             print(event.pos)
-            if True:
-                intro_screen = False
+            if event.pos[0]>200 and event.pos[0]<300 and event.pos[1]>300 and event.pos[1]<400:
+                Choise = AI
+            elif event.pos[0]>500 and event.pos[0]<600 and event.pos[1]>300 and event.pos[1]<400:
+                Choise = Player
+            else:
+                continue
+            for col in range(COL_COUNT):
+                pygame.draw.rect(screen, BLACK, (col * SQUARESIZE, 0, SQUARESIZE, SQUARESIZE))
+            print(Choise)
+            intro_screen = False
 
 draw_board(board, screen)  # Draw the board with recs and black circles
 pygame.display.update()  # Update the graphics
