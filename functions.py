@@ -19,6 +19,9 @@ RED = (200, 0, 0)
 RED_WIN = (139, 0, 0)
 YELLOW_WIN = (255, 243, 128)
 WHITE = (255, 255, 255)
+GREEN = (0, 255, 0)
+ORANGE = (255, 160, 0)
+PALETURQUOISE = (175, 238, 238)
 Player = 1
 AI = 2
 
@@ -26,24 +29,45 @@ AI = 2
 def draw_intro_screen(screen):
     for row in range(ROW_COUNT+1):
         for col in range(COL_COUNT):
-            pygame.draw.rect(screen, YELLOW_WIN, (col*SQUARESIZE, row*SQUARESIZE, SQUARESIZE, SQUARESIZE))
-
-    pygame.draw.rect(screen, RED, (150, 350, SQUARESIZE, SQUARESIZE))  # AI BUTTON
-    pygame.draw.rect(screen, BLUE, (450, 350, SQUARESIZE, SQUARESIZE))  # PVP BUTTON
-
-    myfont = pygame.font.SysFont('monospace', 25)
-    label = myfont.render('AI', 1, RED)
-    screen.blit(label, (185, 320))
-    label = myfont.render('PVsP', 1, BLUE)
-    screen.blit(label, (475, 320))
+            pygame.draw.rect(screen, PALETURQUOISE, (col*SQUARESIZE, row*SQUARESIZE, SQUARESIZE, SQUARESIZE))
 
     myfont = pygame.font.SysFont('monospace', 50)
     label = myfont.render('Welcome to Connect4 !', 1, BLACK)
-    screen.blit(label, (30, 30))
+    screen.blit(label, (40, 50))
 
     myfont = pygame.font.SysFont('monospace', 40)
     label = myfont.render('Choose a game mode:', 1, BLACK)
-    screen.blit(label, (150, 200))
+    screen.blit(label, (150, 170))
+
+    pygame.draw.rect(screen, GREEN, (100, 350, SQUARESIZE, SQUARESIZE))  # AI MODE - EASY
+    pygame.draw.rect(screen, ORANGE, (250, 350, SQUARESIZE, SQUARESIZE))  # AI MODE - NORMAL
+    pygame.draw.rect(screen, RED, (100, 500, SQUARESIZE, SQUARESIZE))  # AI MODE - HARD
+    pygame.draw.rect(screen, BLACK, (250, 500, SQUARESIZE, SQUARESIZE))  # AI MODE - GOD
+
+    myfont = pygame.font.SysFont('monospace', 25)
+    label = myfont.render('AI Level', 1, BLACK)
+    screen.blit(label, (165, 300))
+
+    myfont = pygame.font.SysFont('monospace', 15)
+    label = myfont.render('Easy', 1, BLACK)
+    screen.blit(label, (130, 390))
+
+    label = myfont.render('Normal', 1, BLACK)
+    screen.blit(label, (275, 390))
+
+    label = myfont.render('Hard', 1, BLACK)
+    screen.blit(label, (130, 540))
+
+    label = myfont.render('God', 1, WHITE)
+    screen.blit(label, (285, 540))
+
+    pygame.draw.rect(screen, BLUE, (460, 400, SQUARESIZE, SQUARESIZE))  # PVP BUTTON
+
+    myfont = pygame.font.SysFont('monospace', 20)
+    label = myfont.render('Player Vs.', 1, BLUE)
+    screen.blit(label, (450, 350))
+    label = myfont.render('Player', 1, BLUE)
+    screen.blit(label, (480, 370))
 
     pygame.display.update()  # Update the graphics
 
@@ -61,10 +85,22 @@ def intro_screen(screen, board):
                 sys.exit()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.pos[0] > 150 and event.pos[0] < 250 and event.pos[1] > 350 and event.pos[1] < 450:
-                    Choise = AI
-                elif event.pos[0] > 450 and event.pos[0] < 550 and event.pos[1] > 350 and event.pos[1] < 450:
-                    Choise = Player
+                print(event.pos)
+                if event.pos[0] > 100 and event.pos[0] < 200 and event.pos[1] > 350 and event.pos[1] < 450:
+                    game_mode = AI
+                    AI_level = 'Easy'
+                elif event.pos[0] > 250 and event.pos[0] < 350 and event.pos[1] > 350 and event.pos[1] < 450:
+                    game_mode = AI
+                    AI_level = 'Normal'
+                elif event.pos[0] > 100 and event.pos[0] < 200 and event.pos[1] > 500 and event.pos[1] < 600:
+                    game_mode = AI
+                    AI_level = 'Hard'
+                elif event.pos[0] > 250 and event.pos[0] < 350 and event.pos[1] > 500 and event.pos[1] < 600:
+                    game_mode = AI
+                    AI_level = 'God'
+                elif event.pos[0] > 460 and event.pos[0] < 560 and event.pos[1] > 400 and event.pos[1] < 500:
+                    game_mode = Player
+                    AI_level = None
                 else:
                     continue
                 for col in range(COL_COUNT):
@@ -73,10 +109,11 @@ def intro_screen(screen, board):
 
     draw_board(board, screen)  # Draw the board with recs and black circles
     pygame.display.update()  # Update the graphics
-    return Choise
+    return game_mode, AI_level
 
 
-def p_vs_p(screen, board, turn, game_over, myfont):
+def p_vs_p(screen, board, turn, game_over):
+    myfont = pygame.font.SysFont('monospace', 75)
     while not game_over:
         if all(board[0, :] > 0):
             pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
@@ -143,7 +180,8 @@ def p_vs_p(screen, board, turn, game_over, myfont):
                     pygame.display.update()
 
 
-def p_vs_ai(screen, board, turn, game_over, myfont):
+def p_vs_ai(screen, board, turn, game_over, ai_lvl):
+    myfont = pygame.font.SysFont('monospace', 75)
     while not game_over:
         draw_board(board, screen)
         if all(board[0, :] > 0):
@@ -182,14 +220,15 @@ def p_vs_ai(screen, board, turn, game_over, myfont):
                         draw_board(board, screen)
         # AI
         if turn == 1 and not game_over:
+            if ai_lvl == 'Easy':  # Random AI - Beginner
+                col = np.random.randint(7)
+            elif ai_lvl == 'Normal':  # Better AI - Advanced
+                col = pick_best_col(board)
+            elif ai_lvl == 'Hard':  # Best AI - Expert
+                col, _ = minimax(board, 2, True)
+            elif ai_lvl == 'God':
+                col, _ = minimax(board, 3, True)
 
-            # Random AI - Beginner
-            # col = np.random.randint(7)
-            # Better AI - Advanced
-            # col = pick_best_col(board)
-            # Best AI - Expert
-            col, _ = minimax(board, 4, True)
-            # print(col)
             pygame.time.delay(400)
             if is_valid_column(board, col):
                 board = update_board(board, col, turn + 1)
