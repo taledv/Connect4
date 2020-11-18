@@ -1,6 +1,7 @@
 import numpy as np
 import pygame
 import sys
+import math
 
 # Board Size
 ROW_COUNT = 6
@@ -181,10 +182,14 @@ def p_vs_ai(screen, board, turn, game_over, myfont):
                         draw_board(board, screen)
         # AI
         if turn == 1 and not game_over:
-            # Random AI
+
+            # Random AI - Beginner
             # col = np.random.randint(1, 8)  # Between 1-7
-            # Better AI
+            # Better AI - Advanced
             col = pick_best_col(board)
+            # Best AI - Expert
+            # col = minimax(board, depth=3, Maximizier=AI)
+
             pygame.time.delay(400)
             if is_valid_column(board, col - 1):
                 board = update_board(board, col - 1, turn + 1)
@@ -204,15 +209,39 @@ def p_vs_ai(screen, board, turn, game_over, myfont):
             pygame.time.delay(3000)
 
 
-def valid_cols(board):
-    val_cols = []
-    for col in range(COL_COUNT):
-        if is_valid_column(board, col):
-            val_cols.append(col)
-    return val_cols
+def minimax(board, depth, Maximizier):
+    val_cols = valid_cols(board)
+    is_terminal = is_terminal_node(board)
+    if depth == 0 or is_terminal:
+        if is_terminal:
+            if check_for_win(board, AI):
+                return 1000000
+            elif check_for_win(board, Player):
+                return -1000000
+            else:
+                return 0  # Game over
+        else:  # depth is zero
+            score_position(board)
+    if Maximizier:
+        value = -math.inf
+        for col in val_cols:
+            board_next = board.copy()
+            board_next = update_board(board_next, col, AI)
+            new_score = max(value, minimax(board_next, depth-1, False))
+            return new_score
+    else:  # We are the minimizer player
+        value = math.inf
+        for col in val_cols:
+            board_next = board.copy()
+            board_next = update_board(board_next, col, Player)
+            new_score = min(value, minimax(board_next, depth - 1, True))
+            return new_score
 
 
-# Only for AI
+def is_terminal_node(board):
+    return check_for_win(board, AI) or check_for_win(board, Player) or len(valid_cols(board)) == 0
+
+
 def pick_best_col(board):
     best_score = -1000
     best_col = np.random.randint(1, 8)
@@ -228,7 +257,6 @@ def pick_best_col(board):
     return best_col+1  # convert 0-6 to 1-7
 
 
-# Only for AI
 def score_position(next_state_board):
     score = 0
 
@@ -314,6 +342,14 @@ def is_valid_column(board, col):
         if board[0, col] == 0:
             return True
     return False
+
+
+def valid_cols(board):
+    val_cols = []
+    for col in range(COL_COUNT):
+        if is_valid_column(board, col):
+            val_cols.append(col)
+    return val_cols
 
 
 def check_for_win(board, piece):
