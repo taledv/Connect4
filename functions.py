@@ -168,9 +168,9 @@ def p_vs_ai(screen, board, turn, game_over, myfont):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if turn == 0:
                     # Human player
-                    col = int(event.pos[0] / SQUARESIZE) + 1  # Between 1-7
-                    if is_valid_column(board, col - 1):
-                        board = update_board(board, col - 1, turn + 1)
+                    col = int(event.pos[0] / SQUARESIZE)  # Between 0-6
+                    if is_valid_column(board, col):
+                        board = update_board(board, col, turn + 1)
                         if check_for_win(board, turn + 1):
                             win_indices = winning_indices(board, turn + 1)
 
@@ -184,15 +184,15 @@ def p_vs_ai(screen, board, turn, game_over, myfont):
         if turn == 1 and not game_over:
 
             # Random AI - Beginner
-            # col = np.random.randint(1, 8)  # Between 1-7
+            # col = np.random.randint(7)
             # Better AI - Advanced
-            col = pick_best_col(board)
+            # col = pick_best_col(board)
             # Best AI - Expert
-            # col = minimax(board, depth=3, Maximizier=AI)
-
+            col, _ = minimax(board, 4, True)
+            # print(col)
             pygame.time.delay(400)
-            if is_valid_column(board, col - 1):
-                board = update_board(board, col - 1, turn + 1)
+            if is_valid_column(board, col):
+                board = update_board(board, col, turn + 1)
                 if check_for_win(board, turn + 1):
                     win_indices = winning_indices(board, turn + 1)
 
@@ -212,30 +212,41 @@ def p_vs_ai(screen, board, turn, game_over, myfont):
 def minimax(board, depth, Maximizier):
     val_cols = valid_cols(board)
     is_terminal = is_terminal_node(board)
+    # print(val_cols)
     if depth == 0 or is_terminal:
         if is_terminal:
             if check_for_win(board, AI):
-                return 1000000
+                return None, 1000000000
             elif check_for_win(board, Player):
-                return -1000000
+                return None, -1000000000
             else:
-                return 0  # Game over
+                return None, 0  # Game over
         else:  # depth is zero
-            score_position(board)
+            return None, score_position(board)
+
     if Maximizier:
+        best_col = np.random.randint(7)
         value = -math.inf
         for col in val_cols:
             board_next = board.copy()
             board_next = update_board(board_next, col, AI)
-            new_score = max(value, minimax(board_next, depth-1, False))
-            return new_score
+            new_score = minimax(board_next, depth-1, False)[1]
+            if new_score > value:
+                value = new_score
+                best_col = col
+        return best_col, value
+
     else:  # We are the minimizer player
+        best_col = np.random.randint(7)
         value = math.inf
         for col in val_cols:
             board_next = board.copy()
             board_next = update_board(board_next, col, Player)
-            new_score = min(value, minimax(board_next, depth - 1, True))
-            return new_score
+            new_score = minimax(board_next, depth - 1, True)[1]
+            if new_score < value:
+                value = new_score
+                best_col = col
+        return best_col, value
 
 
 def is_terminal_node(board):
@@ -254,7 +265,7 @@ def pick_best_col(board):
         if score > best_score:
             best_score = score
             best_col = col
-    return best_col+1  # convert 0-6 to 1-7
+    return best_col
 
 
 def score_position(next_state_board):

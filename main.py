@@ -30,5 +30,3 @@ if game_mode == Player:
     p_vs_p(screen, board, turn, game_over, myfont)
 else:
     p_vs_ai(screen, board, turn, game_over, myfont)
-
-
