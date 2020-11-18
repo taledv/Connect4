@@ -25,6 +25,6 @@ game_mode, ai_lvl = intro_screen(screen, board)
 
 
 if game_mode == Player:
-    p_vs_p(screen, board, turn, False)
+    p_vs_p(screen, board, turn)
 else:
-    p_vs_ai(screen, board, turn, False, ai_lvl)
+    p_vs_ai(screen, board, turn, ai_lvl)

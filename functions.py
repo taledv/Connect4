@@ -111,8 +111,9 @@ def intro_screen(screen, board):
     return game_mode, AI_level
 
 
-def p_vs_p(screen, board, turn, game_over):
+def p_vs_p(screen, board, turn):
     myfont = pygame.font.SysFont('monospace', 75)
+    game_over = False
     while not game_over:
         if all(board[0, :] > 0):
             pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
@@ -179,7 +180,8 @@ def p_vs_p(screen, board, turn, game_over):
                     pygame.display.update()
 
 
-def p_vs_ai(screen, board, turn, game_over, ai_lvl):
+def p_vs_ai(screen, board, turn, ai_lvl):
+    game_over = False
     myfont = pygame.font.SysFont('monospace', 75)
     while not game_over:
         draw_board(board, screen)
