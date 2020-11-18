@@ -29,7 +29,7 @@ AI = 2
 def draw_intro_screen(screen):
     for row in range(ROW_COUNT+1):
         for col in range(COL_COUNT):
-            pygame.draw.rect(screen, PALETURQUOISE, (col*SQUARESIZE, row*SQUARESIZE, SQUARESIZE, SQUARESIZE))
+            pygame.draw.rect(screen, (255,255,255), (col*SQUARESIZE, row*SQUARESIZE, SQUARESIZE, SQUARESIZE))
 
     myfont = pygame.font.SysFont('monospace', 50)
     label = myfont.render('Welcome to Connect4 !', 1, BLACK)
@@ -39,9 +39,9 @@ def draw_intro_screen(screen):
     label = myfont.render('Choose a game mode:', 1, BLACK)
     screen.blit(label, (150, 170))
 
-    pygame.draw.rect(screen, GREEN, (100, 350, SQUARESIZE, SQUARESIZE))  # AI MODE - EASY
-    pygame.draw.rect(screen, ORANGE, (250, 350, SQUARESIZE, SQUARESIZE))  # AI MODE - NORMAL
-    pygame.draw.rect(screen, RED, (100, 500, SQUARESIZE, SQUARESIZE))  # AI MODE - HARD
+    pygame.draw.rect(screen, (153,255,153), (100, 350, SQUARESIZE, SQUARESIZE))  # AI MODE - EASY
+    pygame.draw.rect(screen, (255,178,102), (250, 350, SQUARESIZE, SQUARESIZE))  # AI MODE - NORMAL
+    pygame.draw.rect(screen, (204,0,0), (100, 500, SQUARESIZE, SQUARESIZE))  # AI MODE - HARD
     pygame.draw.rect(screen, BLACK, (250, 500, SQUARESIZE, SQUARESIZE))  # AI MODE - GOD
 
     myfont = pygame.font.SysFont('monospace', 25)
@@ -61,7 +61,7 @@ def draw_intro_screen(screen):
     label = myfont.render('God', 1, WHITE)
     screen.blit(label, (285, 540))
 
-    pygame.draw.rect(screen, BLUE, (460, 400, SQUARESIZE, SQUARESIZE))  # PVP BUTTON
+    pygame.draw.rect(screen, (102,178,255), (460, 400, SQUARESIZE, SQUARESIZE))  # PVP BUTTON
 
     myfont = pygame.font.SysFont('monospace', 20)
     label = myfont.render('Player Vs.', 1, BLUE)
