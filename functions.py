@@ -85,7 +85,6 @@ def intro_screen(screen, board):
                 sys.exit()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                print(event.pos)
                 if event.pos[0] > 100 and event.pos[0] < 200 and event.pos[1] > 350 and event.pos[1] < 450:
                     game_mode = AI
                     AI_level = 'Easy'
@@ -251,7 +250,6 @@ def p_vs_ai(screen, board, turn, game_over, ai_lvl):
 def minimax(board, depth, Maximizier):
     val_cols = valid_cols(board)
     is_terminal = is_terminal_node(board)
-    # print(val_cols)
     if depth == 0 or is_terminal:
         if is_terminal:
             if check_for_win(board, AI):
@@ -300,7 +298,6 @@ def pick_best_col(board):
         next_state_board = board.copy()
         next_state_board = update_board(next_state_board, col, AI)
         score = score_position(next_state_board)
-        print((col, score))
         if score > best_score:
             best_score = score
             best_col = col
