@@ -144,6 +144,7 @@ def p_vs_p(screen, board, turn, game_over, myfont):
 
 def p_vs_ai(screen, board, turn, game_over, myfont):
     while not game_over:
+        draw_board(board, screen)
         if all(board[0, :] > 0):
             pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
             label = myfont.render('It is a TIE', 1, WHITE)
@@ -167,7 +168,6 @@ def p_vs_ai(screen, board, turn, game_over, myfont):
                 if turn == 0:
                     # Human player
                     col = int(event.pos[0] / SQUARESIZE) + 1  # Between 1-7
-
                     if is_valid_column(board, col - 1):
                         board = update_board(board, col - 1, turn + 1)
                         if check_for_win(board, turn + 1):
@@ -181,7 +181,10 @@ def p_vs_ai(screen, board, turn, game_over, myfont):
                         draw_board(board, screen)
         # AI
         if turn == 1 and not game_over:
-            col = np.random.randint(1, 8)  # Between 1-7
+            # Random AI
+            # col = np.random.randint(1, 8)  # Between 1-7
+            # Better AI
+            col = pick_best_col(board)
             pygame.time.delay(400)
             if is_valid_column(board, col - 1):
                 board = update_board(board, col - 1, turn + 1)
@@ -199,6 +202,48 @@ def p_vs_ai(screen, board, turn, game_over, myfont):
             draw_end_board(board, screen, win_indices)
             pygame.display.update()
             pygame.time.delay(3000)
+
+
+def valid_cols(board):
+    val_cols = []
+    for col in range(COL_COUNT):
+        if is_valid_column(board, col):
+            val_cols.append(col)
+    return val_cols
+
+
+# Only for AI
+def pick_best_col(board):
+    best_score = 0
+    best_col = np.random.randint(1, 8)
+
+    for col in valid_cols(board):
+        next_state_board = board.copy()
+        next_state_board = update_board(next_state_board, col, AI)
+        score = score_position(next_state_board)
+        print((col, score))
+        if score > best_score:
+            best_score = score
+            best_col = col
+    return best_col+1  # convert 0-6 to 1-7
+
+
+# Only for AI
+def score_position(board):
+    score = 0
+    # Horizontal
+    for row in range(ROW_COUNT):
+        row_list = [int(i) for i in list(board[row, :])]
+        for col in range(COL_COUNT-3):
+            window = row_list[col:col+4]
+            if window.count(AI) == 4:
+                score += 100
+            elif window.count(AI) == 3 and window.count(0) == 1:
+                score += 10
+            # elif window.count(Player) == 3 and window.count(0) == 1:
+            #     score += 1000
+
+    return score
 
 
 def create_board():
