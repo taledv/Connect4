@@ -26,8 +26,6 @@ myfont = pygame.font.SysFont('monospace', 75)
 turn = np.random.randint(2)
 game_over = False
 
-# p_vs_ai(screen, board, turn, game_over, myfont)
-
 if game_mode == Player:
     p_vs_p(screen, board, turn, game_over, myfont)
 else:
