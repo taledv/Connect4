@@ -214,7 +214,7 @@ def valid_cols(board):
 
 # Only for AI
 def pick_best_col(board):
-    best_score = 0
+    best_score = -1000
     best_col = np.random.randint(1, 8)
 
     for col in valid_cols(board):
@@ -229,20 +229,56 @@ def pick_best_col(board):
 
 
 # Only for AI
-def score_position(board):
+def score_position(next_state_board):
     score = 0
+
+    # Gives extra points for center column
+    cen_col_list = [int(i) for i in list(next_state_board[:, COL_COUNT//2])]
+    center_count = cen_col_list.count(AI)
+    score += 6 * center_count
+
     # Horizontal
     for row in range(ROW_COUNT):
-        row_list = [int(i) for i in list(board[row, :])]
+        row_list = [int(i) for i in list(next_state_board[row, :])]
         for col in range(COL_COUNT-3):
             window = row_list[col:col+4]
-            if window.count(AI) == 4:
-                score += 100
-            elif window.count(AI) == 3 and window.count(0) == 1:
-                score += 10
-            # elif window.count(Player) == 3 and window.count(0) == 1:
-            #     score += 1000
+            score += evaluate_window(window)
 
+    # Vertical
+    for col in range(COL_COUNT):
+        col_list = [int(i) for i in list(next_state_board[:, col])]
+        for row in range(ROW_COUNT-3):
+            window = col_list[row:row+4]
+            score += evaluate_window(window)
+
+    # Negative diagonal
+    for row in range(ROW_COUNT - 3):
+        for col in range(COL_COUNT - 3):
+            window = [next_state_board[row, col], next_state_board[row + 1, col + 1],
+                      next_state_board[row + 2, col + 2], next_state_board[row + 3, col + 3]]
+            score += evaluate_window(window)
+
+    # Positive diagonal
+    for row in range(ROW_COUNT - 3):
+        for col in range(COL_COUNT-1, 2, -1):
+            window = [next_state_board[row, col], next_state_board[row + 1, col - 1],
+                      next_state_board[row + 2, col - 2], next_state_board[row + 3, col - 3]]
+            score += evaluate_window(window)
+    return score
+
+
+def evaluate_window(window):
+    score = 0
+    if window.count(AI) == 4:
+        score += 100
+    elif window.count(AI) == 3 and window.count(0) == 1:
+        score += 10
+    elif window.count(AI) == 2 and window.count(0) == 2:
+        score += 5
+    elif window.count(Player) == 2 and window.count(0) == 2:
+        score -= 8
+    elif window.count(Player) == 3 and window.count(0) == 1:
+        score -= 80
     return score
 
 
