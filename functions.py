@@ -24,7 +24,7 @@ ORANGE = (255, 160, 0)
 PALETURQUOISE = (175, 238, 238)
 Player = 1
 AI = 2
-
+AI_Delay_ms = 300
 
 def draw_intro_screen(screen):
     for row in range(ROW_COUNT+1):
@@ -72,7 +72,7 @@ def draw_intro_screen(screen):
     pygame.display.update()  # Update the graphics
 
 
-def intro_screen(screen, board):
+def intro_screen(screen, board, score):
 
     draw_intro_screen(screen)
     pygame.display.update()  # Update the graphics
@@ -106,12 +106,74 @@ def intro_screen(screen, board):
                     pygame.draw.rect(screen, BLACK, (col * SQUARESIZE, 0, SQUARESIZE, SQUARESIZE))
                 intro_screen = False
 
-    draw_board(board, screen)  # Draw the board with recs and black circles
+    draw_board(board, screen, score)  # Draw the board with recs and black circles
     pygame.display.update()  # Update the graphics
     return game_mode, AI_level
 
 
-def p_vs_p(screen, board, turn):
+def draw_board(board, screen, score):
+    for row in range(ROW_COUNT):
+        for col in range(COL_COUNT):
+            pygame.draw.rect(screen, BLUE, (col*SQUARESIZE, (row+1)*SQUARESIZE, SQUARESIZE, SQUARESIZE))
+            if board[row, col] == 0:
+                pygame.draw.circle(screen, BLACK, ((col+0.5)*SQUARESIZE, (row+1.5)*SQUARESIZE), SQUARESIZE/2-3)
+            elif board[row, col] == 1:
+                pygame.draw.circle(screen, RED, ((col+0.5)*SQUARESIZE, (row+1.5)*SQUARESIZE), SQUARESIZE/2-3)
+            else:
+                pygame.draw.circle(screen, YELLOW, ((col+0.5)*SQUARESIZE, (row+1.5) * SQUARESIZE), SQUARESIZE/2 - 3)
+
+    for col in range(COL_COUNT):
+        pygame.draw.rect(screen, BLACK, (col * SQUARESIZE, (ROW_COUNT + 1) * SQUARESIZE, SQUARESIZE, SQUARESIZE))
+
+    myfont = pygame.font.SysFont('monospace', 60)
+    label = myfont.render(str(score[0]), 1, RED)
+    screen.blit(label, (280, 730))
+    label = myfont.render(':', 1, WHITE)
+    screen.blit(label, (320, 730))
+    label = myfont.render(str(score[1]), 1, YELLOW)
+    screen.blit(label, (360, 730))
+
+    pygame.display.update()  # Update the graphics
+
+
+def draw_end_board(board, screen, winning_indices, score):
+
+    draw_board(board, screen, score)
+
+    for i in range(winning_indices.shape[0]):  # Marking the winning 4 with different color tones
+        if board[winning_indices[i, 0], winning_indices[i, 1]] == 1:
+            pygame.draw.circle(screen, RED_WIN, ((winning_indices[i, 1]+0.5)*SQUARESIZE, (winning_indices[i, 0]+1.5)*SQUARESIZE), SQUARESIZE/2-3)
+        else:
+            pygame.draw.circle(screen, YELLOW_WIN, ((winning_indices[i, 1]+0.5)*SQUARESIZE, (winning_indices[i, 0]+1.5)*SQUARESIZE), SQUARESIZE/2-3)
+    pygame.display.update()  # Update the graphics
+
+    pygame.draw.rect(screen, WHITE, (SQUARESIZE, 7*SQUARESIZE, SQUARESIZE, SQUARESIZE))
+    pygame.draw.rect(screen, WHITE, (5*SQUARESIZE, 7 * SQUARESIZE, SQUARESIZE, SQUARESIZE))
+
+    myfont = pygame.font.SysFont('monospace', 20)
+    label = myfont.render('Return', 1, BLACK)
+    screen.blit(label, (115, 740))
+    label = myfont.render('Again', 1, BLACK)
+    screen.blit(label, (520, 740))
+    pygame.display.update()  # Update the graphics
+
+    PlayerChoice = True
+
+    while PlayerChoice:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.pos[0] > 100 and event.pos[0] < 200 and event.pos[1] > 700 and event.pos[1] < 800:
+                    PlayerChoice = False
+                    Again = False
+                elif event.pos[0] > 500 and event.pos[0] < 600 and event.pos[1] > 700 and event.pos[1] < 800:
+                    PlayerChoice = False
+                    Again = True
+    return Again
+
+
+def p_vs_p(screen, board, turn, score):
     myfont = pygame.font.SysFont('monospace', 75)
     game_over = False
     while not game_over:
@@ -137,10 +199,10 @@ def p_vs_p(screen, board, turn):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if turn == 0:
                     # Player 1
-                    col = int(event.pos[0] / SQUARESIZE) + 1  # Between 1-7
+                    col = int(event.pos[0] / SQUARESIZE)  # Between 0-6
 
-                    if is_valid_column(board, col - 1):
-                        board = update_board(board, col - 1, turn + 1)
+                    if is_valid_column(board, col):
+                        board = update_board(board, col, turn + 1)
                         if check_for_win(board, turn + 1):
                             win_indices = winning_indices(board, turn + 1)
 
@@ -151,10 +213,10 @@ def p_vs_p(screen, board, turn):
                         turn = 1 - turn
                 else:
                     # Player 2
-                    col = int(event.pos[0] / SQUARESIZE) + 1  # Between 1-7
+                    col = int(event.pos[0] / SQUARESIZE)   # Between 0-6
 
-                    if is_valid_column(board, col - 1):
-                        board = update_board(board, col - 1, turn + 1)
+                    if is_valid_column(board, col):
+                        board = update_board(board, col, turn + 1)
                         if check_for_win(board, turn + 1):
                             win_indices = winning_indices(board, turn + 1)
 
@@ -164,13 +226,19 @@ def p_vs_p(screen, board, turn):
                             game_over = True
                         turn = 1-turn
 
-                draw_board(board, screen)
+                draw_board(board, screen, score)
 
                 if game_over:
-                    draw_end_board(board, screen, win_indices)
+                    score[1-turn] += 1
+                    Again = draw_end_board(board, screen, win_indices, score)
                     pygame.display.update()
-                    pygame.time.delay(2500)
 
+                    if Again:
+                        game_over = False
+                        board = create_board()
+                        turn = np.random.randint(2)  # Random initial player
+                        draw_board(board, screen, score)
+                        pygame.display.update()
                 # Immediately change color of the piece. don't wait for motion of the mouse
                 if not game_over:
                     if turn == 0:
@@ -180,11 +248,11 @@ def p_vs_p(screen, board, turn):
                     pygame.display.update()
 
 
-def p_vs_ai(screen, board, turn, ai_lvl):
+def p_vs_ai(screen, board, turn, ai_lvl, score):
     game_over = False
     myfont = pygame.font.SysFont('monospace', 75)
     while not game_over:
-        draw_board(board, screen)
+        draw_board(board, screen, score)
         if all(board[0, :] > 0):
             pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
             label = myfont.render('It is a TIE', 1, WHITE)
@@ -218,7 +286,7 @@ def p_vs_ai(screen, board, turn, ai_lvl):
                             screen.blit(label, (180, 10))
                             game_over = True
                         turn = 1 - turn
-                        draw_board(board, screen)
+                        draw_board(board, screen, score)
         # AI
         if turn == 1 and not game_over:
             if ai_lvl == 'Easy':  # Random AI - Beginner
@@ -230,7 +298,7 @@ def p_vs_ai(screen, board, turn, ai_lvl):
             elif ai_lvl == 'God':
                 col, _ = minimax(board, 3, True)
 
-            pygame.time.delay(400)
+            pygame.time.delay(AI_Delay_ms)
             if is_valid_column(board, col):
                 board = update_board(board, col, turn + 1)
                 if check_for_win(board, turn + 1):
@@ -241,12 +309,18 @@ def p_vs_ai(screen, board, turn, ai_lvl):
                     screen.blit(label, (180, 10))
                     game_over = True
                 turn = 1 - turn
-                draw_board(board, screen)
+                draw_board(board, screen, score)
 
         if game_over:
-            draw_end_board(board, screen, win_indices)
+            score[1 - turn] += 1
+            Again = draw_end_board(board, screen, win_indices, score)
             pygame.display.update()
-            pygame.time.delay(3000)
+            if Again:
+                game_over = False
+                board = create_board()
+                turn = np.random.randint(2)  # Random initial player
+                draw_board(board, screen, score)
+                pygame.display.update()
 
 
 def minimax(board, depth, Maximizier):
@@ -300,7 +374,6 @@ def pick_best_col(board):
         next_state_board = board.copy()
         next_state_board = update_board(next_state_board, col, AI)
         score = score_position(next_state_board)
-        # print(col, score)
         if score > best_score:
             best_score = score
             best_col = col
@@ -364,19 +437,6 @@ def create_board():
     return np.zeros((ROW_COUNT, COL_COUNT), dtype=int)
 
 
-def draw_board(board, screen):
-    for row in range(ROW_COUNT):
-        for col in range(COL_COUNT):
-            pygame.draw.rect(screen, BLUE, (col*SQUARESIZE, (row+1)*SQUARESIZE, SQUARESIZE, SQUARESIZE))
-            if board[row, col] == 0:
-                pygame.draw.circle(screen, BLACK, ((col+0.5)*SQUARESIZE, (row+1.5)*SQUARESIZE), SQUARESIZE/2-3)
-            elif board[row, col] == 1:
-                pygame.draw.circle(screen, RED, ((col+0.5)*SQUARESIZE, (row+1.5)*SQUARESIZE), SQUARESIZE/2-3)
-            else:
-                pygame.draw.circle(screen, YELLOW, ((col+0.5)*SQUARESIZE, (row+1.5) * SQUARESIZE), SQUARESIZE/2 - 3)
-    pygame.display.update()  # Update the graphics
-
-
 def update_board(board, col, piece):
     row_init = ROW_COUNT-1
     while row_init >= 0:
@@ -412,7 +472,6 @@ def check_for_win(board, piece):
     for col in range(COL_COUNT):
         for row in range(ROW_COUNT-3):
             if all(board[row:row+4, col] == piece):
-                # print(row, col)
                 return True
     # negative diagonals
     for row in range(ROW_COUNT-3):
@@ -452,14 +511,3 @@ def winning_indices(board, piece):
             if (board[row, col] == piece) and (board[row+1, col-1] == piece) and (board[row+2, col-2] == piece) and (board[row+3, col-3] == piece):
                 return np.array([[row, col], [row+1, col-1], [row+2, col-2], [row+3, col-3]])
 
-
-def draw_end_board(board, screen, winning_indices):
-
-    draw_board(board, screen)
-
-    for i in range(winning_indices.shape[0]):
-        if board[winning_indices[i, 0], winning_indices[i, 1]] == 1:
-            pygame.draw.circle(screen, RED_WIN, ((winning_indices[i, 1]+0.5)*SQUARESIZE, (winning_indices[i, 0]+1.5)*SQUARESIZE), SQUARESIZE/2-3)
-        else:
-            pygame.draw.circle(screen, YELLOW_WIN, ((winning_indices[i, 1]+0.5)*SQUARESIZE, (winning_indices[i, 0]+1.5)*SQUARESIZE), SQUARESIZE/2-3)
-    pygame.display.update()  # Update the graphics

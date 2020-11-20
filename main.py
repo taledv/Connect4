@@ -8,13 +8,14 @@ COL_COUNT = 7
 SQUARESIZE = 100
 
 width = COL_COUNT*SQUARESIZE
-height = (ROW_COUNT+1)*SQUARESIZE
+height = (ROW_COUNT+2)*SQUARESIZE
 size = (width, height)
 
 Player = 1
 AI = 2
 
 while 1:
+    initScore = [0, 0]
     board = create_board()
     turn = np.random.randint(2)  # Random initial player
 
@@ -22,9 +23,9 @@ while 1:
     pygame.display.set_mode(size)  # Set window size
     screen = pygame.display.set_mode(size)  # Init screen (surface)
 
-    game_mode, ai_lvl = intro_screen(screen, board)
+    game_mode, ai_lvl = intro_screen(screen, board, initScore)
 
     if game_mode == Player:
-        p_vs_p(screen, board, turn)
+        p_vs_p(screen, board, turn, initScore)
     else:
-        p_vs_ai(screen, board, turn, ai_lvl)
+        p_vs_ai(screen, board, turn, ai_lvl, initScore)
